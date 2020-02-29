@@ -17,14 +17,13 @@ enum {
  	TD_VRDSK
 };
 enum custom_keycodes {
-	MOVE,
+	MOVE = SAFE_RANGE,
 	MOVE_SHIFT,
-	CTR,
 	SELECT,
 	SELECT_MOVE,
 	SELECT_MOVE_SHIFT,
-	FN3,
-	ADJUST,
+	NUM,
+	SYM,
 	dance_cln_finished,
 	KC_GUITAB,
 	KC_MOVE,
@@ -52,10 +51,9 @@ enum custom_keycodes {
 #define KC_CPYW LGUI(X_LSHIFT(LCTL(KC_3)))  // Copy whole screen
 #define KC_CAPP LGUI(X_LSHIFT(KC_4))       // Capture portion of screen
 #define KC_CPYP LGUI(X_LSHIFT(LCTL(KC_4)))  // Copy portion of screen
-#define KC_X0 MT(MOD_LCTL, KC_ESC)
 //#define KC_GUITAB RWIN_T(KC_TAB)
 
-#define KC_TABCTL MOD_LCTL(KC_TAB)
+#define KC_TABCTL MT(MOD_LCTL, KC_TAB)
 #define KC_NUM MO(NUM)
 #define KC_SYMENT LT(SYM, KC_ENT)
 
@@ -367,7 +365,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_Q, KC_W, KC_E,    KC_R,    KC_T,                                       KC_Y, KC_U,    KC_I,    KC_O,   KC_P,    \
   KC_A, KC_S, KC_D,    KC_F,    KC_G,                                       KC_H, KC_J,    KC_K,    KC_L,   KC_SCLN, \
   KC_Z, KC_X, KC_C,    KC_V,    KC_B,                                       KC_N, KC_M,    KC_COMM, KC_DOT, KC_SLSH, \
-       KC_CTRL, KC_ALT,                                                                    KC_BSLS, KC_EQL,          \
+       KC_LCTL, KC_LALT,                                                                    KC_BSLS, KC_EQL,          \
                                   KC_TABCTL,                        KC_SYMENT,                                       \
                                       KC_MOVE,KC_LSFT,   KC_BSPC,  KC_SPACE,                                           \
                                       KC_NUM, KC_LGUI,    KC_LGUI,  ____
@@ -548,7 +546,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_F1, KC_F2, KC_F3,    KC_F4,    KC_F5,                                       ____, KC_1,KC_2, KC_3, ____,         \
   KC_F6, KC_F7, KC_F8,    KC_F9,    KC_F10,                                       ____, KC_4,KC_5, KC_6, ____,         \
   KC_F11, KC_F12, ____,    ____,    ____,                                       ____, KC_7, KC_8, KC_9, KC_ENT,         \
-        KC_REST, ____,                                                                      KC_0, KC_PLUS,             \
+        RESET, ____,                                                                      KC_0, KC_PLUS,             \
                                   ____,                        ____,                                                 \
                                       ____, ____,     ____,  ____,                                                   \
                                       ____, ____,     ____,  ____
@@ -578,7 +576,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_SYM] = LAYOUT( \
   KC_EXLM,KC_AT, KC_HASH, KC_DLR,KC_PERC,                                       KC_CAR, KC_AMPR,KC_ASTR,KC_LPRN,KC_RPRN,         \
   LSFT(KC_GRAVE), KC_GRAVE, LSFT(KC_LBRC), LSFT(KC_RBRC), KC_MINUS,             ____, KC_LPRN,KC_RPRN, ____, ____,         \
-  ____,           ____,       KC_LSBRC, KC_RBRC, LSFT(KC_MINUS),                ____, LSFT(KC_MINUS), KC_MINUS, ____, ____,         \
+  ____,           ____,       KC_LBRC, KC_RBRC, LSFT(KC_MINUS),                ____, LSFT(KC_MINUS), KC_MINUS, ____, ____,         \
         ____, ____,                                                              KC_MINUS, KC_EQL,               \
                                   ____,                        ____,                                                 \
                                       ____, ____,     ____,  ____,                                                   \
