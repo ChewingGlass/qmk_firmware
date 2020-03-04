@@ -54,8 +54,8 @@ enum custom_keycodes {
 //#define KC_GUITAB RWIN_T(KC_TAB)
 
 #define KC_TABCTL MT(MOD_LCTL, KC_TAB)
-#define KC_NUM MO(NUM)
-#define KC_SYMENT LT(SYM, KC_ENT)
+#define KC_NUM MO(_NUM)
+#define KC_SYMENT LT(_SYM, KC_ENT)
 
 #define KC_EXLM LSFT(KC_1)
 #define KC_AT LSFT(KC_2)
@@ -354,7 +354,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                             |  TAB |                             | ENT  |
  *                             |   +  |                             |  +   |
  *                             | CTRL |                             | SYM  |
- *                             +------'                             '------+
+ *                             +------'                             '------u
  *                                    '------+------' '------+------'
  *                                    | MOVE | SHFT | | BSP  |SPACE |
  *                                    '------+------' '------+------'
