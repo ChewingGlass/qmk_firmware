@@ -42,7 +42,8 @@ enum custom_keycodes {
     KC_R_WRD,
     KC_B_WRD,
     KC_S_COPY,
-    KC_S_CUT
+    KC_S_CUT,
+    KC_SEL_A
 };
 
 #define KC_ KC_TRNS
@@ -53,9 +54,10 @@ enum custom_keycodes {
 #define KC_CPYP LGUI(X_LSHIFT(LCTL(KC_4)))  // Copy portion of screen
 //#define KC_GUITAB RWIN_T(KC_TAB)
 
-#define KC_TABCTL MT(MOD_LCTL, KC_TAB)
-#define KC_NUM MO(_NUM)
-#define KC_SYMENT LT(_SYM, KC_ENT)
+#define KC_SEL_A M(23) // OSL(_SELECT) // turns on the select oneshot, turns off when any key is pressed
+#define KC_TABNUM LT(_NUM, KC_TAB)
+#define KC_SYM MO(_SYM)
+#define KC_CTRLENT MT(MOD_LCTL, KC_ENT)
 
 #define KC_EXLM LSFT(KC_1)
 #define KC_AT LSFT(KC_2)
@@ -99,8 +101,8 @@ enum custom_keycodes {
 
 #define KC_SELALL LCTL(KC_A)
 
-// #define MOVE X_LALT // mac
-#define MOVE X_LCTRL // linux/windows
+#define MOVE X_LALT // mac
+//#define MOVE X_LCTRL // linux/windows
 
 
 // Fillers to make layering more clear
@@ -226,6 +228,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       	    }
       		return false;
 
+      	case KC_SEL_A: // Activate select mode
+                   if(p) {
+                     select_active = !select_active;
+                     layer_on(_SELECT_MOVE);
+                   }
+                   return false;
+
       	case KC_R_WRD: // right word
       	    if(p) {
                 SEND_STRING(SS_DOWN(MOVE) SS_DOWN(X_RIGHT));
@@ -319,6 +328,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
               else {
                 shift_down=false;
                 layer_off(_SELECT_MOVE_SHIFT);
+                layer_off(_MOVE_SHIFT);
                 layer_off(_MOVE);
                 if (alt_down) {
                   if(select_active) {
@@ -353,12 +363,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *        '------+------'-------------'                             '-------------'------+------'
  *                             |  TAB |                             | ENT  |
  *                             |   +  |                             |  +   |
- *                             | CTRL |                             | SYM  |
+ *                             | NUM |                             | CTRL  |
  *                             +------'                             '------u
  *                                    '------+------' '------+------'
  *                                    | MOVE | SHFT | | BSP  |SPACE |
  *                                    '------+------' '------+------'
- *                                    | NUM  | GUI  | |      |      |
+ *                                    | SYM  | GUI  | |      |      |
  *                                    '------+------' '------+------'
  */
 [_BASE] = LAYOUT( \
@@ -366,9 +376,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_A, KC_S, KC_D,    KC_F,    KC_G,                                       KC_H, KC_J,    KC_K,    KC_L,   KC_SCLN, \
   KC_Z, KC_X, KC_C,    KC_V,    KC_B,                                       KC_N, KC_M,    KC_COMM, KC_DOT, KC_SLSH, \
        KC_LCTL, KC_LALT,                                                                    KC_BSLS, KC_EQL,          \
-                                  KC_TABCTL,                        KC_SYMENT,                                       \
+                                  KC_TABNUM,                        KC_CTRLENT,                                       \
                                       KC_MOVE,KC_LSFT,   KC_BSPC,  KC_SPACE,                                           \
-                                      KC_NUM, KC_LGUI,    KC_LGUI,  ____
+                                      KC_SYM, KC_LGUI,    KC_ESC,  ____
 ),
 
 /* MOVE
@@ -386,20 +396,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                             |      |                             |      |
  *                             +------'                             '------+
  *                                    '------+------' '------+------'
- *                                    |      |MSHIFT| | RUN  |DEBUG |
+ *                                    |      |MSHIFT| | RUN  | SEL_A|
  *                                    '------+------' '------+------'
- *                                    |      |      | |      |      |
+ *                                    |      |      | | DEBUG|      |
  *                                    '------+------' '------+------'
  */
 
 [_MOVE] = LAYOUT( \
   ____, KC_CLOSE, KC_B_WRD,KC_REF,____,                                     ____, KC_L_WRD, KC_UP, KC_R_WRD, ____,         \
-  ____, ____, ____,    ____,    ____,                                       ____, KC_LEFT,    KC_D, KC_RIGHT, ____,         \
+  ____, ____, ____,    ____,    ____,                                       ____, KC_LEFT,  KC_DOWN, KC_RIGHT, ____,         \
   KC_UNDO, KC_CUT, KC_COPY, KC_PASTE,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, KC_MSHIFT,                                                                  KC_PTAB, KC_NTAB,               \
-                                  ____,                        KC_ALTENT,                                                 \
-                                      ____,KC_MSHIFT,     KC_RUN,  KC_DEBUG,                                                   \
-                                      ____, ____,     ____,  ____
+                                  ____,                        KC_CTRLENT,                                                 \
+                                      ____,KC_MSHIFT,     KC_RUN,  KC_SEL_A,                                                   \
+                                      ____, ____,     KC_DEBUG,  ____
 ),
  /* MOVE_SHIFT
   * ,----------------------------------,                             ,----------------------------------,
@@ -452,7 +462,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     *                                    '------+------' '------+------'
     */
 [_SELECT] = LAYOUT( \
-  ____, ____, ____,    ____,    ____,                                       ____, ____,    ____, ____, ____,         \
+  ____, ____, ____,    ____,    ____,                                       KC_A, ____,    ____, ____, ____,         \
   ____, ____, ____,    ____,    ____,                                       ____, ____,    ____, ____, ____,         \
   ____, ____, ____,    ____,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, KC_MSHIFT,                                                                        ____, ____,               \
@@ -487,7 +497,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_UNDO, KC_CUT, KC_COPY, KC_PASTE,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, KC_MSHIFT,                                                                        ____, ____,               \
                                   ____,                        ____,                                                 \
-                                      ____, ____,     ____,  ____,                                                   \
+                                      KC_MOVE, KC_MSHIFT,     ____,  ____,                                                   \
                                       ____, ____,     ____,  ____
 ),
    /* SELECT_MOVE_SHIFT
@@ -556,7 +566,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,----------------------------------,                             ,----------------------------------,
  * | !    | @    |  #   |  $   |  %   |                             |  ^   |  &   |   *  |  (   |   )  |
  * |------+------+------+------+------|                             |-------------+------+------+------|
- * |  ~   |   `  |  {   |  }   |  -   |                             |      |  (   |   )  |      |      |
+ * |  ~   |   `  |  {   |  }   |  -   |                             |      |  (   |   )  |  '   |  "   |
  * |------+------+------+------+------|                             |------|------+------+------+------|
  * |      |      |  [   |  ]   |  _   |                             |      |  _   |  -   |      |      |
  * |------+------+------+-------------,                             ,-------------+------+------+------,
@@ -575,7 +585,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_SYM] = LAYOUT( \
   KC_EXLM,KC_AT, KC_HASH, KC_DLR,KC_PERC,                                       KC_CAR, KC_AMPR,KC_ASTR,KC_LPRN,KC_RPRN,         \
-  LSFT(KC_GRAVE), KC_GRAVE, LSFT(KC_LBRC), LSFT(KC_RBRC), KC_MINUS,             ____, KC_LPRN,KC_RPRN, ____, ____,         \
+  LSFT(KC_GRAVE), KC_GRAVE, LSFT(KC_LBRC), LSFT(KC_RBRC), KC_MINUS,             ____, KC_LPRN,KC_RPRN, KC_QUOT, LSFT(KC_QUOT),         \
   ____,           ____,       KC_LBRC, KC_RBRC, LSFT(KC_MINUS),                ____, LSFT(KC_MINUS), KC_MINUS, ____, ____,         \
         ____, ____,                                                              KC_MINUS, KC_EQL,               \
                                   ____,                        ____,                                                 \
