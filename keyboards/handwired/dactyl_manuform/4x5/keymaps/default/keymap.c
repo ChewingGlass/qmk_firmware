@@ -70,14 +70,22 @@ enum custom_keycodes {
 #define KC_LPRN LSFT(KC_9)
 #define KC_RPRN LSFT(KC_0)
 
-#define KC_SAVE LCTL(KC_S)
-#define KC_COPY LCTL(KC_C)
-#define KC_CUT LCTL(KC_X)
-#define KC_PASTE LCTL(KC_V)
-#define KC_UNDO LCTL(KC_Z)
+#define OS_CTL LCMD
+
+#define KC_ALTAB OS_CTL(KC_TAB)
+#define KC_AALTAB OS_CTL(KC_TILDE)
+
+#define KC_NAVTEST OS_CTL(LSFT(KC_T))
+#define KC_SAVE OS_CTL(KC_S)
+#define KC_COPY OS_CTL(KC_C)
+#define KC_CUT OS_CTL(KC_X)
+#define KC_PASTE OS_CTL(KC_V)
+#define KC_UNDO OS_CTL(KC_Z)
 #define KC_ALTENT LALT(KC_ENT)
-#define KC_REDO LCTL(LSFT(KC_Z))
+#define KC_COMMENT OS_CTL(KC_SLSH)
+#define KC_REDO OS_CTL(LSFT(KC_Z))
 #define KC_FORMAT LALT(LSFT(KC_L))
+#define KC_GOTO OS_CTL(KC_B)
 #define KC_DIR LALT(LSFT(KC_D))
 #define KC_OPEN LALT(LSFT(KC_O))
 #define KC_FINDA LALT(LSFT(KC_F))
@@ -88,15 +96,15 @@ enum custom_keycodes {
 #define KC_SDEBUG LSFT(LALT(LCTL(KC_D))) // Debug on cursor intellij
 #define KC_MVRT LALT(KC_4) // Move window right (do a split) in intellij
 #define KC_MVGRP LALT(LSFT(KC_4)) // Alternate the group of the window in intellij
-#define KC_CLOSE LCTL(KC_W)
-#define KC_REP LCTL(KC_R)
+#define KC_CLOSE OS_CTL(KC_W)
+#define KC_REP OS_CTL(KC_R)
 #define KC_REPA LALT(LSFT(KC_R))
 #define KC_OPG LALT(KC_S) // Move to the opposite group intellij
-#define KC_FIND LCTL(KC_F)
+#define KC_FIND OS_CTL(KC_F)
 #define KC_P_TAB LCTL(KC_PGUP)
 #define KC_N_TAB LCTL(KC_PGDN)
-#define KC_PTAB LALT(KC_LBRC)
-#define KC_NTAB LALT(KC_RBRC)
+#define KC_PREV LALT(KC_LBRC)
+#define KC_NEXT LALT(KC_RBRC)
 #define KC_REF LCTL(KC_R)
 
 #define KC_SELALL LCTL(KC_A)
@@ -255,6 +263,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
           case KC_S_COPY: //scopy
               if (p) {
+
                 SEND_STRING(SS_DOWN(MOVE) SS_DOWN(X_C));
               }
               else {
@@ -359,7 +368,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+------+------|                             |------|------+------+------+------|
  * |   z  |   x  |   c  |   v  |   b  |                             |   n  |   m  |   ,  |   .  |   /  |
  * |------+------+------+-------------,                             ,-------------+------+------+------,
- *        |  CTRL| ALT  |                                                         |   \  |   =  |
+ *        |  CAPS| ALT  |                                                         |   \  |   =  |
  *        '------+------'-------------'                             '-------------'------+------'
  *                             |  TAB |                             | ENT  |
  *                             |   +  |                             |  +   |
@@ -368,28 +377,28 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                    '------+------' '------+------'
  *                                    | MOVE | SHFT | | BSP  |SPACE |
  *                                    '------+------' '------+------'
- *                                    | SYM  | GUI  | |      |      |
+ *                                    | GUI  | SYM  | |      |      |
  *                                    '------+------' '------+------'
  */
 [_BASE] = LAYOUT( \
   KC_Q, KC_W, KC_E,    KC_R,    KC_T,                                       KC_Y, KC_U,    KC_I,    KC_O,   KC_P,    \
   KC_A, KC_S, KC_D,    KC_F,    KC_G,                                       KC_H, KC_J,    KC_K,    KC_L,   KC_SCLN, \
   KC_Z, KC_X, KC_C,    KC_V,    KC_B,                                       KC_N, KC_M,    KC_COMM, KC_DOT, KC_SLSH, \
-       KC_LCTL, KC_LALT,                                                                    KC_BSLS, KC_EQL,          \
+       KC_CAPS, KC_LALT,                                                                    KC_BSLS, KC_EQL,          \
                                   KC_TABNUM,                        KC_CTRLENT,                                       \
-                                      KC_MOVE,KC_LSFT,   KC_BSPC,  KC_SPACE,                                           \
-                                      KC_SYM, KC_LGUI,    KC_ESC,  ____
+                                      KC_MOVE, KC_SYM,   KC_BSPC,  KC_SPACE,                                           \
+                                      KC_LSFT, KC_LGUI,    KC_ESC,  ____
 ),
 
 /* MOVE
  * ,----------------------------------,                             ,----------------------------------,
- * |      | CLOSE|B_WRD |  REF |      |                             |      | L_WRD|  UP  | R_WRD|      |
+ * |ALTAB | CLOSE|B_WRD |  REF |      |                             |      | L_WRD|  UP  | R_WRD|      |
  * |------+------+------+------+------|                             |-------------+------+------+------|
- * |SELALL| SAVE |      | FIND |      |                             |   END| LEFT | DOWN | RIGHT|      |
+ * |SELALL| SAVE |mshift| FIND |      |                             |   END| LEFT | DOWN | RIGHT|      |
  * |------+------+------+------+------|                             |------|------+------+------+------|
- * | UNDO | CUT  | COPY |PASTE |      |                             |      |      |      |      |      |
+ * | UNDO | CUT  | COPY |PASTE |      |                             |      |      | P_TAB|N_TAB |      |
  * |------+------+------+-------------,                             ,-------------+------+------+------,
- *        |      |MSHIFT|                                                         | PTAB | NTAB |
+ *        |      |MSHIFT|                                                         | PREV | NEXT |
  *        '------+------'-------------'                             '-------------'------+------'
  *                             |      |                             |      |
  *                             |      |                             |ALTENT|
@@ -403,17 +412,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 
 [_MOVE] = LAYOUT( \
-  ____, KC_CLOSE, KC_B_WRD,KC_REF,____,                                     ____, KC_L_WRD, KC_UP, KC_R_WRD, ____,         \
-  ____, ____, ____,    ____,    ____,                                       ____, KC_LEFT,  KC_DOWN, KC_RIGHT, ____,         \
-  KC_UNDO, KC_CUT, KC_COPY, KC_PASTE,    ____,                                       ____, ____,    ____, ____, ____,         \
-        ____, KC_MSHIFT,                                                                  KC_PTAB, KC_NTAB,               \
-                                  ____,                        KC_CTRLENT,                                                 \
-                                      ____,KC_MSHIFT,     KC_RUN,  KC_SEL_A,                                                   \
-                                      ____, ____,     KC_DEBUG,  ____
+  KC_ALTAB, KC_CLOSE, KC_B_WRD,KC_REP,____,                                     ____, KC_L_WRD, KC_UP, KC_R_WRD, ____,         \
+  ____, KC_SAVE, KC_MSHIFT,KC_FIND,    ____,                                       KC_END, KC_LEFT,  KC_DOWN, KC_RIGHT, ____,         \
+  KC_UNDO, KC_CUT, KC_COPY, KC_PASTE,KC_GOTO,                                       ____,____, KC_P_TAB,KC_N_TAB,  KC_COMMENT,         \
+        ____, KC_MSHIFT,                                                                  KC_PREV, KC_NEXT,               \
+                                  ____,                        KC_ALTENT,                                                 \
+                                      ____,____,     KC_RUN,  KC_SEL_A,                                                   \
+                                      KC_MSHIFT, ____,     KC_DEBUG,  ____
 ),
  /* MOVE_SHIFT
   * ,----------------------------------,                             ,----------------------------------,
-  * |      | CLOSE|B_WRD |REPA |      |                             |      | L_WRD| PGUP | OPEN |      |
+  * |AALTAB| CLOSE|B_WRD |REPA | NAVTEST |                             |      | L_WRD| PGUP | OPEN |      |
   * |------+------+------+------+------|                             |-------------+------+------+------|
   * |SELALL| SAVE |  DIR   | FINDA |      |                             |  HOME|      | PGDN | RIGHT|      |
   * |------+------+------+------+------|                             |------|------+------+------+------|
@@ -432,13 +441,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   *                                    '------+------' '------+------'
   */
 [_MOVE_SHIFT] = LAYOUT( \
-  ____, KC_CLOSE, KC_B_WRD,KC_REPA,    ____,                              ____, KC_L_WRD, KC_PGUP, KC_OPEN, ____,         \
+  KC_AALTAB, KC_CLOSE, KC_B_WRD,KC_REPA,    KC_NAVTEST,                              ____, KC_L_WRD, KC_PGUP, KC_OPEN, ____,         \
   KC_SELALL, KC_SAVE, KC_DIR, KC_FINDA,    ____,                           KC_HOME, ____,    KC_PGDN, KC_RIGHT, ____,         \
   KC_REDO, ____,____ ,    ____,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, ____,                                                                        ____, ____,               \
                                   ____,                        KC_ALTENT,                                                 \
-                                      ____, KC_MSHIFT,     KC_SRUN,  KC_SDEBUG,                                                   \
-                                      ____, ____,     ____,  ____
+                                      ____, ____,     KC_SRUN,  KC_SDEBUG,                                                   \
+                                      KC_MSHIFT, ____,     ____,  ____
 ),
 
    /* SELECT
@@ -467,8 +476,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ____, ____, ____,    ____,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, KC_MSHIFT,                                                                        ____, ____,               \
                                   ____,                        ____,                                                 \
-                                      KC_MOVE, KC_MSHIFT,     ____,  ____,                                                   \
-                                      ____, ____,     ____,  ____
+                                      KC_MOVE, ____,     ____,  ____,                                                   \
+                                      KC_MSHIFT, ____,     ____,  ____
 ),
 
    /* SELECT_MOVE
@@ -497,8 +506,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_UNDO, KC_CUT, KC_COPY, KC_PASTE,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, KC_MSHIFT,                                                                        ____, ____,               \
                                   ____,                        ____,                                                 \
-                                      KC_MOVE, KC_MSHIFT,     ____,  ____,                                                   \
-                                      ____, ____,     ____,  ____
+                                      KC_MOVE, ____,     ____,  ____,                                                   \
+                                      KC_MSHIFT, ____,     ____,  ____
 ),
    /* SELECT_MOVE_SHIFT
     * ,----------------------------------,                             ,----------------------------------,
@@ -526,8 +535,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ____, ____, ____,    ____,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, KC_MSHIFT,                                                                        ____, ____,               \
                                   ____,                        ____,                                                 \
-                                      KC_MOVE, KC_MSHIFT,     ____,  ____,                                                   \
-                                      ____, ____,     ____,  ____
+                                      KC_MOVE, ____,     ____,  ____,                                                   \
+                                      KC_MSHIFT, ____,     ____,  ____
 ),
 
 /* NUM
@@ -564,11 +573,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* SYM
  * ,----------------------------------,                             ,----------------------------------,
- * | !    | @    |  #   |  $   |  %   |                             |  ^   |  &   |   *  |  (   |   )  |
+ * | !    | @    |  #   |  $   |  %   |                             |  ^   |  &   |   *  |  +   |   =  |
  * |------+------+------+------+------|                             |-------------+------+------+------|
- * |  ~   |   `  |  {   |  }   |  -   |                             |      |  (   |   )  |  '   |  "   |
+ * |  ~   |   `  |  {   |  }   |  [   |                             |   ]  |  (   |   )  |  '   |  "   |
  * |------+------+------+------+------|                             |------|------+------+------+------|
- * |      |      |  [   |  ]   |  _   |                             |      |  _   |  -   |      |      |
+ * |      |      |  [   |  ]   |  _   |                             |   -  |  _   |      |      |  |   |
  * |------+------+------+-------------,                             ,-------------+------+------+------,
  *        |      |      |                                                         |  -   |  =   |
  *        '------+------'-------------'                             '-------------'------+------'
@@ -584,12 +593,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 
 [_SYM] = LAYOUT( \
-  KC_EXLM,KC_AT, KC_HASH, KC_DLR,KC_PERC,                                       KC_CAR, KC_AMPR,KC_ASTR,KC_LPRN,KC_RPRN,         \
-  LSFT(KC_GRAVE), KC_GRAVE, LSFT(KC_LBRC), LSFT(KC_RBRC), KC_MINUS,             ____, KC_LPRN,KC_RPRN, KC_QUOT, LSFT(KC_QUOT),         \
-  ____,           ____,       KC_LBRC, KC_RBRC, LSFT(KC_MINUS),                ____, LSFT(KC_MINUS), KC_MINUS, ____, ____,         \
+  KC_EXLM,KC_AT, KC_HASH, KC_DLR,KC_PERC,                                       KC_CAR, KC_AMPR,KC_ASTR,KC_PLUS,KC_EQL,         \
+  LSFT(KC_GRAVE), KC_GRAVE, LSFT(KC_LBRC), LSFT(KC_RBRC), KC_LBRC,             KC_RBRC, KC_LPRN,KC_RPRN, KC_QUOT, LSFT(KC_QUOT),         \
+  ____,           ____,       KC_LBRC, KC_RBRC, LSFT(KC_MINUS),                KC_MINUS, LSFT(KC_MINUS), ____, ____, LSFT(KC_BSLS),         \
         ____, ____,                                                              KC_MINUS, KC_EQL,               \
                                   ____,                        ____,                                                 \
-                                      ____, ____,     ____,  ____,                                                   \
+                                      ____, ____,     LSFT(KC_MINUS),  KC_MINUS,                                                   \
                                       ____, ____,     ____,  ____
 )
 };
