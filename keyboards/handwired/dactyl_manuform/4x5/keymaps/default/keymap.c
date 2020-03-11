@@ -70,7 +70,8 @@ enum custom_keycodes {
 #define KC_LPRN LSFT(KC_9)
 #define KC_RPRN LSFT(KC_0)
 
-#define OS_CTL LCMD
+#define OS_CTL LCTL
+//#define OS_CTL LCMD
 
 #define KC_ALTAB OS_CTL(KC_TAB)
 #define KC_AALTAB OS_CTL(KC_TILDE)
@@ -80,8 +81,9 @@ enum custom_keycodes {
 #define KC_COPY OS_CTL(KC_C)
 #define KC_CUT OS_CTL(KC_X)
 #define KC_PASTE OS_CTL(KC_V)
+#define KC_TERMPASTE OS_CTL(LSFT(KC_V))
 #define KC_UNDO OS_CTL(KC_Z)
-#define KC_ALTENT LALT(KC_ENT)
+#define KC_ALTENT LCTL(KC_ENT)
 #define KC_COMMENT OS_CTL(KC_SLSH)
 #define KC_REDO OS_CTL(LSFT(KC_Z))
 #define KC_FORMAT LALT(LSFT(KC_L))
@@ -109,8 +111,8 @@ enum custom_keycodes {
 
 #define KC_SELALL LCTL(KC_A)
 
-#define MOVE X_LALT // mac
-//#define MOVE X_LCTRL // linux/windows
+//#define MOVE X_LALT // mac
+#define MOVE X_LCTRL // linux/windows
 
 
 // Fillers to make layering more clear
@@ -412,8 +414,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 
 [_MOVE] = LAYOUT( \
-  KC_ALTAB, KC_CLOSE, KC_B_WRD,KC_REP,____,                                     ____, KC_L_WRD, KC_UP, KC_R_WRD, ____,         \
-  ____, KC_SAVE, KC_MSHIFT,KC_FIND,    ____,                                       KC_END, KC_LEFT,  KC_DOWN, KC_RIGHT, ____,         \
+  KC_ALTAB, KC_CLOSE, KC_B_WRD,KC_REP,____,                                     ____, KC_L_WRD, KC_UP, KC_R_WRD, KC_MVRT,         \
+  KC_SELALL, KC_SAVE, KC_MSHIFT,KC_FIND,    ____,                                       KC_END, KC_LEFT,  KC_DOWN, KC_RIGHT, KC_OPG,         \
   KC_UNDO, KC_CUT, KC_COPY, KC_PASTE,KC_GOTO,                                       ____,____, KC_P_TAB,KC_N_TAB,  KC_COMMENT,         \
         ____, KC_MSHIFT,                                                                  KC_PREV, KC_NEXT,               \
                                   ____,                        KC_ALTENT,                                                 \
@@ -441,9 +443,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   *                                    '------+------' '------+------'
   */
 [_MOVE_SHIFT] = LAYOUT( \
-  KC_AALTAB, KC_CLOSE, KC_B_WRD,KC_REPA,    KC_NAVTEST,                              ____, KC_L_WRD, KC_PGUP, KC_OPEN, ____,         \
+  KC_AALTAB, KC_CLOSE, KC_B_WRD,KC_REPA,    KC_NAVTEST,                              ____, KC_L_WRD, KC_PGUP, KC_OPEN, KC_MVGRP,         \
   KC_SELALL, KC_SAVE, KC_DIR, KC_FINDA,    ____,                           KC_HOME, ____,    KC_PGDN, KC_RIGHT, ____,         \
-  KC_REDO, ____,____ ,    ____,    ____,                                       ____, ____,    ____, ____, ____,         \
+  KC_REDO, ____,____ ,    KC_TERMPASTE,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, ____,                                                                        ____, ____,               \
                                   ____,                        KC_ALTENT,                                                 \
                                       ____, ____,     KC_SRUN,  KC_SDEBUG,                                                   \
@@ -503,7 +505,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_SELECT_MOVE] = LAYOUT( \
   ____, ____, ____,    ____,    ____,                                       ____, KC_SEL_L_WRD,KC_SEL_U, KC_SEL_R_WRD, ____,         \
   ____, ____, ____,    ____,    ____,                                       KC_SEL_END,KC_SEL_L,KC_SEL_D, KC_SEL_R, ____,         \
-  KC_UNDO, KC_CUT, KC_COPY, KC_PASTE,    ____,                                       ____, ____,    ____, ____, ____,         \
+  KC_UNDO, KC_S_CUT, KC_S_COPY, KC_PASTE,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, KC_MSHIFT,                                                                        ____, ____,               \
                                   ____,                        ____,                                                 \
                                       KC_MOVE, ____,     ____,  ____,                                                   \
@@ -566,8 +568,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_F6, KC_F7, KC_F8,    KC_F9,    KC_F10,                                       ____, KC_4,KC_5, KC_6, ____,         \
   KC_F11, KC_F12, ____,    ____,    ____,                                       ____, KC_7, KC_8, KC_9, KC_ENT,         \
         RESET, ____,                                                                      KC_0, KC_PLUS,             \
-                                  ____,                        ____,                                                 \
-                                      ____, ____,     ____,  ____,                                                   \
+                                  ____,                        KC_PLUS,                                                 \
+                                      ____, ____,     KC_DOT,  KC_0,                                                   \
                                       ____, ____,     ____,  ____
 ),
 
