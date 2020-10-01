@@ -19,6 +19,7 @@ int16_t cum_y = 0;
 int16_t sensor_x = 0;
 int16_t sensor_y = 0;
 uint16_t mouse_moved_timer;
+uint16_t key_pressed_timer;
 uint16_t accel_timer;
 
 // Thresholds help to move only horizontal or vertical. When accumulated distance reaches threshold, only move one discrete value in direction with bigger delta.
@@ -30,13 +31,18 @@ bool smooth_scroll = true;
 uint8_t	scroll_threshold = 400 / regular_smoothscroll_factor;	// divide if started smooth
 uint16_t scroll_threshold_inte = 1200 / regular_smoothscroll_factor;
 
-uint8_t accel_time_threshold = 30; // x ms to get over accel_threshold ? decelerate.
-uint16_t cursor_accel = 5;
-uint16_t accel_threshold = 60;
-#define cursor_multiplier 50	// adjust cursor speed
-uint16_t max_cursor_multiplier = 500;
+#define click_time 400 // Number of ms where clicking j is a click after moving the mouse
+
+#define cursor_multiplier 30	// adjust cursor speed
+
+#define accel_enabled true
+uint16_t cursor_accel =  4;
+uint16_t accel_threshold = 45; // Distance to cover at cursor_multiplier to trigger accel
+uint16_t max_cursor_multiplier = 200;
 uint16_t curr_cursor_multiplier = cursor_multiplier;
 uint16_t cursor_multiplier_inte = 20;
+
+uint16_t start_time;
 #define CPI_STEP 20
 
 int16_t cur_factor;
@@ -94,6 +100,7 @@ enum custom_keycodes {
     KC_S_CUT,
     KC_SEL_A,
     KC_JLCLK,
+    KC_LEFT_OR_CLCK,
     KC_KRCLK,
     KC_ULCLK,
     KC_IRCLK,
@@ -209,9 +216,28 @@ bool volatile alt_down=false;
 bool volatile select_active=false;
 bool volatile pressed_something_else=false;
 bool volatile pressed_something_else_gui=false;
-bool volatile mouse_pressed=false;
+static volatile int mouse_pressed[256];
+void mouse_or_key(uint8_t mouse_button, uint16_t keycode, bool pressed) {
+        if (pressed) {
+          if (timer_elapsed(mouse_moved_timer) < click_time) {
+            mouse_moved_timer = timer_read() + 150; // Don't allow long after a click to get the double click
+            mouse_pressed[mouse_button]++;
+       		on_mouse_button(mouse_button, pressed);
+          } else {
+            register_code(keycode);
+          }
+        } else {
+          if (mouse_pressed[mouse_button] > 0) {
+            on_mouse_button(mouse_button, pressed);
+            mouse_pressed[mouse_button]--;
+          } else {
+            unregister_code(keycode);
+          }
+        }
+}
+
 uint16_t fallthrough;
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+bool process_record_user_impl(uint16_t keycode, keyrecord_t *record) {
     bool p = record->event.pressed;
 
   	switch (keycode) {
@@ -419,6 +445,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 layer_off(_MOVE_SHIFT);
                 layer_off(_SELECT_MOVE_SHIFT);
                 layer_off(_SELECT_MOVE);
+                layer_off(_MISSION_CONTROL);
               }
               return false;
 
@@ -455,72 +482,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
               return false;
 
       case KC_JLCLK:
-        if (p) {
-          if (timer_elapsed(mouse_moved_timer) < 400) {
-      		on_mouse_button(MOUSE_BTN1, p);
-            mouse_pressed = true;
-          } else {
-            SEND_STRING(SS_DOWN(X_J));
-          }
-        } else {
-          if (mouse_pressed) {
-      		on_mouse_button(MOUSE_BTN1, p);
-            mouse_pressed = false;
-          } else {
-            SEND_STRING(SS_UP(X_J));
-          }
-        }
+        mouse_or_key(MOUSE_BTN1, KC_J, p);
         return false;
+
+      case KC_LEFT_OR_CLCK:
+        mouse_or_key(MOUSE_BTN1, KC_LEFT, p);
+        return false;
+
       case KC_KRCLK:
-        if (p) {
-          if (timer_elapsed(mouse_moved_timer) < 400) {
-            mouse_pressed = true;
-       		on_mouse_button(MOUSE_BTN2, p);
-          } else {
-            SEND_STRING(SS_DOWN(X_K));
-          }
-        } else {
-          if (mouse_pressed) {
-            on_mouse_button(MOUSE_BTN2, p);
-            mouse_pressed = false;
-          } else {
-            SEND_STRING(SS_UP(X_K));
-          }
-        }
+        mouse_or_key(MOUSE_BTN2, KC_K, p);
         return false;
     case KC_ULCLK:
-        if (p) {
-          if (timer_elapsed(mouse_moved_timer) < 400) {
-      		on_mouse_button(MOUSE_BTN1, p);
-            mouse_pressed = true;
-          } else {
-            SEND_STRING(SS_DOWN(X_U));
-          }
-        } else {
-          if (mouse_pressed) {
-      		on_mouse_button(MOUSE_BTN1, p);
-            mouse_pressed = false;
-          } else {
-            SEND_STRING(SS_UP(X_U));
-          }
-        }
+        mouse_or_key(MOUSE_BTN1, KC_U, p);
         return false;
       case KC_IRCLK:
-        if (p) {
-          if (timer_elapsed(mouse_moved_timer) < 400) {
-            mouse_pressed = true;
-       		on_mouse_button(MOUSE_BTN2, p);
-          } else {
-            SEND_STRING(SS_DOWN(X_I));
-          }
-        } else {
-          if (mouse_pressed) {
-            on_mouse_button(MOUSE_BTN2, p);
-            mouse_pressed = false;
-          } else {
-            SEND_STRING(SS_UP(X_I));
-          }
-        }
+        mouse_or_key(MOUSE_BTN2, KC_I, p);
         return false;
       case KC_SCROLL:
         if (p) {
@@ -533,7 +509,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
   	}
 
+   mouse_moved_timer = start_time;
    return true;
+}
+void interruptsOff(void) {
+        EIMSK &= ~(1<<INT6); // Disable int6 while processing
+}
+
+void interruptsOn(void) {
+        EIMSK |= (1<<INT6);                       //enable INT6
+}
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    interruptsOff();
+    bool ret = process_record_user_impl(keycode, record);
+    interruptsOn();
+    return ret;
 }
 
 
@@ -593,7 +583,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_MOVE] = LAYOUT( \
   KC_ALTAB, KC_CLOSE, KC_B_WRD,KC_REP,____,                                     ____, KC_L_WRD, KC_UP, KC_R_WRD, KC_MVRT,         \
-  KC_SELALL, KC_SAVE, KC_MSHIFT,KC_FIND,    ____,                                       KC_END, KC_LEFT,  KC_DOWN, KC_RIGHT, KC_OPG,         \
+  KC_SELALL, KC_SAVE, KC_MSHIFT,KC_FIND,    ____,                                       KC_END, KC_LEFT_OR_CLCK,  KC_DOWN, KC_RIGHT, KC_OPG,         \
   KC_UNDO, KC_CUT, KC_COPY, KC_PASTE,KC_GOTO,                                       ____,____, KC_P_TAB,KC_N_TAB,  KC_COMMENT,         \
         ____, KC_MSHIFT,                                                                  KC_PREV, KC_NEXT,               \
                                   ____,                        KC_ALTENT,                                                 \
@@ -837,10 +827,17 @@ Trackball stuff
  **************************/
 
 void pointing_device_init(void){
+    start_time = timer_read();
 	if(!is_keyboard_master())
 		return;
 
     mouse_moved_timer = timer_read();
+    #ifndef POLLING
+          EIMSK &= ~(1<<INT6); // Disable int6
+          EICRB |= (1<<ISC60)|(0<<ISC61);   //set up INT6 for falling edge
+          EIMSK |= (1<<INT6);                       //enable INT6
+    #endif
+
 	pmw_init();
 }
 
@@ -898,26 +895,20 @@ void tap_tb(uint8_t keycode0, uint8_t keycode1, uint8_t keycode2, uint8_t keycod
 void handle_pointing_device_modes(void){
 	report_mouse_t mouse_report = pointing_device_get_report();
 	if (track_mode == cursor_mode) {
-        		cum_x += sensor_x;
-        		cum_y += sensor_y;
-	      uint16_t diff = (abs(cum_x) + abs(cum_y));
-	      uint16_t elapsed = timer_elapsed(accel_timer);
-	    if (diff > accel_threshold || elapsed > accel_time_threshold) {
-	      cum_x = 0;
-	      cum_y = 0;
-
-	      if (elapsed > accel_time_threshold) {
-	        curr_cursor_multiplier -= cursor_accel;
-            if (curr_cursor_multiplier < cursor_multiplier) {
-              curr_cursor_multiplier = cursor_multiplier;
-            }
-	      } else {
-	        curr_cursor_multiplier += cursor_accel * (abs(accel_timer - elapsed) / (double) accel_timer);;
-            if (curr_cursor_multiplier > max_cursor_multiplier) {
-               curr_cursor_multiplier = max_cursor_multiplier;
-            }
-	      }
-	      accel_timer = timer_read();
+	    if (accel_enabled) {
+          	    uint16_t diff = (abs(sensor_x) + abs(sensor_y));
+          	    uint32_t scaled_accel_threshold = accel_threshold + (curr_cursor_multiplier - cursor_multiplier);
+          	      if (diff > scaled_accel_threshold) {
+                      curr_cursor_multiplier += cursor_accel;
+                      if (curr_cursor_multiplier > max_cursor_multiplier) {
+                         curr_cursor_multiplier = max_cursor_multiplier;
+                      }
+          	      } else {
+          	          curr_cursor_multiplier -= cursor_accel;
+                      if (curr_cursor_multiplier < cursor_multiplier) {
+                        curr_cursor_multiplier = cursor_multiplier;
+                      }
+          }
 	    }
 
 		if (integration_mode)
@@ -926,9 +917,7 @@ void handle_pointing_device_modes(void){
 			cur_factor = curr_cursor_multiplier;
 		mouse_report.x = CLAMP_HID( sensor_x * cur_factor / 100);
 		mouse_report.y = CLAMP_HID(-sensor_y * cur_factor / 100);
-		if (sensor_x != 0 || sensor_y != 0) {
-		  mouse_moved_timer = timer_read();
-		}
+		mouse_moved_timer = timer_read();
 	} else {
 		// accumulate movement until threshold reached
 		cum_x += sensor_x;
@@ -989,8 +978,11 @@ void pointing_device_task(void) {
 
 #ifndef POLLING
 	ISR(INT6_vect) {
+	    // Don't allow us to be interrupted until we're done here
+	    interruptsOff();
 		get_sensor_data();
 		handle_pointing_device_modes();
+		interruptsOn();
 	}
 #endif
 

@@ -56,4 +56,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* number of backlight levels */
 // #define BACKLIGHT_LEVELS 3
-#define POLLING true
+//#define POLLING true
