@@ -178,15 +178,15 @@ enum custom_keycodes {
 #define KC_SELALL OS_CTL(KC_A)
 
 
-#define XOS_CTL X_LCTL
-#define OS_CTL LCTL
-//#define OS_CTL LCMD
-//#define XOS_CTL X_LCMD
+//#define XOS_CTL X_LCTL // linux
+//#define OS_CTL LCTL // linux
+#define OS_CTL LCMD // mac
+#define XOS_CTL X_LCMD // mac
 
-//#define MOVE X_LALT // mac
-//#define LMOVE LALT // mac
-#define MOVE X_LCTL // linux
-#define LMOVE LCTL // linux
+#define MOVE X_LALT // mac
+#define LMOVE LALT // mac
+//#define MOVE X_LCTL // linux
+//#define LMOVE LCTL // linux
 
 
 // Fillers to make layering more clear
@@ -216,22 +216,22 @@ bool volatile alt_down=false;
 bool volatile select_active=false;
 bool volatile pressed_something_else=false;
 bool volatile pressed_something_else_gui=false;
-static volatile int mouse_pressed[256];
-void mouse_or_key(uint8_t mouse_button, uint16_t keycode, bool pressed) {
+static volatile bool mouse_pressed[256];
+void mouse_or_key(uint8_t mouse_btn, uint16_t k, bool pressed) {
         if (pressed) {
           if (timer_elapsed(mouse_moved_timer) < click_time) {
             mouse_moved_timer = timer_read() + 150; // Don't allow long after a click to get the double click
-            mouse_pressed[mouse_button]++;
-       		on_mouse_button(mouse_button, pressed);
+            on_mouse_button(mouse_btn, pressed);
+            mouse_pressed[mouse_btn] = true;
           } else {
-            register_code(keycode);
+            register_code(k);
           }
         } else {
-          if (mouse_pressed[mouse_button] > 0) {
-            on_mouse_button(mouse_button, pressed);
-            mouse_pressed[mouse_button]--;
+          if (mouse_pressed[mouse_btn]) {
+            mouse_pressed[mouse_btn] = false;
+            on_mouse_button(mouse_btn, pressed);
           } else {
-            unregister_code(keycode);
+            unregister_code(k);
           }
         }
 }
@@ -517,7 +517,9 @@ void interruptsOff(void) {
 }
 
 void interruptsOn(void) {
+  #ifndef POLLING
         EIMSK |= (1<<INT6);                       //enable INT6
+  #endif
 }
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     interruptsOff();
@@ -917,7 +919,9 @@ void handle_pointing_device_modes(void){
 			cur_factor = curr_cursor_multiplier;
 		mouse_report.x = CLAMP_HID( sensor_x * cur_factor / 100);
 		mouse_report.y = CLAMP_HID(-sensor_y * cur_factor / 100);
-		mouse_moved_timer = timer_read();
+		if (mouse_report.x > 0 || mouse_report.y > 0 || mouse_report.y < 0 || mouse_report.x < 0) {
+       		mouse_moved_timer = timer_read();
+		}
 	} else {
 		// accumulate movement until threshold reached
 		cum_x += sensor_x;
