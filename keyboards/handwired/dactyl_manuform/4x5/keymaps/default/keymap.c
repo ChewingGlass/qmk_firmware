@@ -148,6 +148,7 @@ enum custom_keycodes {
 #define KC_COMMENT OS_CTL(KC_SLSH)
 #define KC_REDO OS_CTL(LSFT(KC_Z))
 #define KC_FORMAT LALT(LSFT(KC_L))
+#define KC_OPT_IMP LCMD(LSFT(KC_SCLN))
 #define KC_GOTO OS_CTL(KC_B)
 #define KC_DIR LALT(LSFT(KC_D))
 #define KC_OPEN LALT(LSFT(KC_O))
@@ -614,7 +615,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   */
 [_MOVE_SHIFT] = LAYOUT( \
   KC_AALTAB, KC_CLOSE, KC_B_WRD,KC_REPA,    KC_NAVTEST,                              ____, KC_L_WRD, KC_PGUP, KC_OPEN, KC_MVGRP,         \
-  KC_SELALL, KC_SAVE, KC_DIR, KC_FINDA,    ____,                           KC_HOME, ____,    KC_PGDN, KC_FORMAT, ____,         \
+  KC_SELALL, KC_SAVE, KC_DIR, KC_FINDA,    ____,                           KC_HOME, ____,    KC_PGDN, KC_FORMAT, KC_OPT_IMP,         \
   KC_REDO, ____,____ ,    KC_TERMPASTE,    ____,                                       ____, ____,    ____, ____, ____,         \
         ____, ____,                                                                        ____, ____,               \
                                   ____,                        KC_ALTENT,                                                 \
