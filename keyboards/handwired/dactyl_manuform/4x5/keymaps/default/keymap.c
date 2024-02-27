@@ -33,14 +33,14 @@ uint16_t scroll_threshold_inte = 1200 / regular_smoothscroll_factor;
 
 #define click_time 400 // Number of ms where clicking j is a click after moving the mouse
 
-#define cursor_multiplier 30	// adjust cursor speed
+#define cursor_multiplier 15	// adjust cursor speed
 
 #define accel_enabled true
-uint16_t cursor_accel =  4;
-uint16_t accel_threshold = 45; // Distance to cover at cursor_multiplier to trigger accel
-uint16_t max_cursor_multiplier = 200;
+uint16_t cursor_accel =  2;
+uint16_t accel_threshold = 22; // Distance to cover at cursor_multiplier to trigger accel
+uint16_t max_cursor_multiplier = 100;
 uint16_t curr_cursor_multiplier = cursor_multiplier;
-uint16_t cursor_multiplier_inte = 20;
+uint16_t cursor_multiplier_inte = 10;
 
 uint16_t start_time;
 #define CPI_STEP 20
